@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+      color: white;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="solar-system"></canvas>
+
+  <script>
+    const canvas = document.getElementById('solar-system');
+    const context = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const sun = {
+      radius: 50,
+      defaultRadius: 50,
+      color: 'yellow',
+      x: canvas.width / 2,
+      y: canvas.height / 2
+    };
+
+    const planets = [
+      { name: 'Mercúrio', radius: 5, defaultRadius: 5, distance: 50, color: 'gray', angle: 0 },
+      { name: 'Vênus', radius: 10, defaultRadius: 10, distance: 80, color: 'orange', angle: 0 },
+      { name: 'Terra', radius: 12, defaultRadius: 12, distance: 120, color: 'blue', angle: 0 },
+      { name: 'Marte', radius: 8, defaultRadius: 8, distance: 180, color: 'red', angle: 0 },
+      { name: 'Júpiter', radius: 25, defaultRadius: 25, distance: 300, color: 'brown', angle: 0 },
+      { name: 'Saturno', radius: 20, defaultRadius: 20, distance: 400, color: 'yellow', angle: 0 },
+      { name: 'Urano', radius: 18, defaultRadius: 18, distance: 500, color: 'lightblue', angle: 0 },
+      { name: 'Netuno', radius: 16, defaultRadius: 16, distance: 600, color: 'darkblue', angle: 0 },
+    ];
+
+    function draw() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw stars in the background
+      for (let i = 0; i < 200; i++) {
+        const starX = Math.random() * canvas.width;
+        const starY = Math.random() * canvas.height;
+        context.fillStyle = 'white';
+        context.beginPath();
+        context.arc(starX, starY, 1, 0, 2 * Math.PI);
+        context.fill();
+      }
+
+      // Draw the sun
+      context.fillStyle = sun.color;
+      context.beginPath();
+      context.arc(sun.x, sun.y, sun.radius, 0, 2 * Math.PI);
+      context.fill();
+      // Draw the sun's name
+      context.fillStyle = 'white';
+      context.font = '14px Arial';
+      context.fillText('Sol', sun.x - 15, sun.y - sun.radius - 5);
+
+      // Draw the planets
+      planets.forEach(planet => {
+        planet.angle += 0.005; // Adjust the speed of rotation
+
+        const planetX = sun.x + planet.distance * Math.cos(planet.angle);
+        const planetY = sun.y + planet.distance * Math.sin(planet.angle);
+
+        // Draw the orbit
+        context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        context.beginPath();
+        context.arc(sun.x, sun.y, planet.distance, 0, 2 * Math.PI);
+        context.stroke();
+
+        // Draw the planet
+        context.fillStyle = planet.color;
+        context.beginPath();
+        context.arc(planetX, planetY, planet.radius, 0, 2 * Math.PI);
+        context.fill();
+
+        // Draw the planet's name
+        context.fillStyle = 'white';
+        context.font = '12px Arial';
+        context.fillText(planet.name, planetX - planet.radius, planetY - planet.radius - 5);
+
+        // Draw Saturn's ring
+        if (planet.name === 'Saturno') {
+          const ringRadius = 1.5 * planet.radius;
+          context.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+          context.lineWidth = 2;
+          context.beginPath();
+          context.arc(planetX, planetY, ringRadius, 0, 2 * Math.PI);
+          context.stroke();
+          context.lineWidth = 1; // Reset line width
+        }
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+
+    function handleMouseMove(event) {
+      const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+      const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+      planets.forEach(planet => {
+        const distanceToPlanet = Math.sqrt((planet.x - mouseX) ** 2 + (planet.y - mouseY) ** 2);
+
+        if (distanceToPlanet < planet.radius) {
+          planet.radius = planet.defaultRadius * 1.5; // Increase size on mouseover
+        } else {
+          planet.radius = planet.defaultRadius; // Reset size if not over
+        }
+      });
+
+      const distanceToSun = Math.sqrt((sun.x - mouseX) ** 2 + (sun.y - mouseY) ** 2);
+      if (distanceToSun < sun.radius) {
+        sun.radius = sun.defaultRadius * 1.5; // Increase size on mouseover
+      } else {
+        sun.radius = sun.defaultRadius; // Reset size if not over
+      }
+    }
+
+    draw();
+  </script>
+</body>
+</html>
